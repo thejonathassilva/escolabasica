@@ -1,12 +1,15 @@
-const database = require('../models');
+// const database = require('../models');
+
+const { NiveisServices } = require('../services');
+const nivelServices = new NiveisServices();
 
 class NivelController {
 
     static async pegaTodosOsNiveis(req, res) {
         try {
-            const todosOsNiveis = await database.Niveis.findAll();
+            const todosOsNiveis = await nivelServices.pegaTodosOsRegistros();
             return res.status(200).json(todosOsNiveis);
-        } catch (e) {
+        } catch (error) {
             return res.status(500).json(error.message);
         }
     }
@@ -14,13 +17,9 @@ class NivelController {
     static async pegaUmNivel(req, res) {
         const { id } = req.params;
         try {
-            const umNivel = await database.Niveis.findOne({
-                where: {
-                    id: Number(id)
-                }
-            })
+            const umNivel = await nivelServices.pegaUmRegistro(id);
             return res.status(200).json(umNivel);
-        } catch (e) {
+        } catch (error) {
             return res.status(500).json(error.message);
         } 
     }
@@ -28,9 +27,9 @@ class NivelController {
     static async criaUmNivel(req, res) {
             const novoNivel = req.body;
             try {
-                const novoNivelCriado = await database.Niveis.create(novoNivel);
+                const novoNivelCriado = await nivelServices.criaRegistro(novoNivel);
                 return res.status(200).json(novoNivelCriado);
-            } catch (e) {
+            } catch (error) {
             return res.status(500).json(error.message);
             
         }
@@ -40,18 +39,10 @@ class NivelController {
         const { id } = req.params;
         const nivelAtualizado = req.body;
         try {
-            await database.Niveis.update(nivelAtualizado, {
-                where: {
-                    id: Number(id)
-                }
-            }) 
-            const novoNivel = await database.Niveis.findOne({
-                where: {
-                    id: Number(id)
-                }
-            }) 
+            await nivelServices.atualizaRegistro(nivelAtualizado, id);
+            const novoNivel = await nivelServices.pegaUmRegistro(id);
             return res.status(200).json(novoNivel);
-        } catch (e) {
+        } catch (error) {
             return res.status(500).json(error.message);
         }
     }
@@ -59,14 +50,21 @@ class NivelController {
     static async deletaUmNivel(req, res) {
         const { id } = req.params;
         try {
-            await database.Niveis.destroy({
-                where: {
-                    id: Number(id)
-                }
-            })
+            await nivelServices.apagaRegistro(id);
             return res.status(200).json(`id ${id} deletado`);
-        } catch (e) {
+        } catch (error) {
             return res.status(500).json(error.message);
+        }
+    }
+    
+    static async restauraUmNivel(req, res) {
+        const { id } = req.params;
+        try {
+            await nivelServices.restauraRegistro(id);
+            return res.status(200).json(`id ${id} restaurado`)
+        } catch (error) {
+            return res.status(500).json(error.message);
+            
         }
     }
 }
